@@ -1,0 +1,128 @@
+name: Rust CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        rust: [stable]
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: ${{ matrix.rust }}
+        override: true
+        components: rustfmt, clippy
+
+    - name: Cache cargo registry
+      uses: actions/cache@v3
+      with:
+        path: ~/.cargo/registry
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Cache cargo index
+      uses: actions/cache@v3
+      with:
+        path: ~/.cargo/git
+        key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Cache cargo build
+      uses: actions/cache@v3
+      with:
+        path: target
+        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Check formatting
+      run: cargo fmt -- --check
+
+    - name: Run clippy
+      run: cargo clippy -- -D warnings
+
+    - name: Build
+      run: cargo build --release --verbose
+
+    - name: Run tests
+      run: cargo test --verbose
+
+  release:
+    name: Release - ${{ matrix.platform.release_for }}
+    if: startsWith(github.ref, 'refs/tags/')
+    strategy:
+      matrix:
+        platform:
+          - release_for: Linux-x86_64
+            os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            bin: ollama_testing
+            name: ollama-tui-Linux-x86_64.tar.gz
+
+          - release_for: macOS-x86_64
+            os: macos-latest
+            target: x86_64-apple-darwin
+            bin: ollama_testing
+            name: ollama-tui-Darwin-x86_64.tar.gz
+
+          - release_for: macOS-aarch64
+            os: macos-latest
+            target: aarch64-apple-darwin
+            bin: ollama_testing
+            name: ollama-tui-Darwin-aarch64.tar.gz
+
+          - release_for: Windows-x86_64
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+            bin: ollama_testing.exe
+            name: ollama-tui-Windows-x86_64.zip
+
+    runs-on: ${{ matrix.platform.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.platform.target }}
+          override: true
+
+      - name: Build binary
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --target ${{ matrix.platform.target }}
+
+      - name: Package (Unix)
+        if: matrix.platform.os != 'windows-latest'
+        run: |
+          cd target/${{ matrix.platform.target }}/release
+          tar czvf ../../../${{ matrix.platform.name }} ${{ matrix.platform.bin }}
+          cd -
+
+      - name: Package (Windows)
+        if: matrix.platform.os == 'windows-latest'
+        run: |
+          cd target/${{ matrix.platform.target }}/release
+          7z a ../../../${{ matrix.platform.name }} ${{ matrix.platform.bin }}
+          cd -
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ matrix.platform.name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

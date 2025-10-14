@@ -1,0 +1,25 @@
+# Rust
+/target/
+Cargo.lock
+**/*.rs.bk
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Application data
+.ollama_tui/
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
