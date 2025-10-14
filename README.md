@@ -58,6 +58,7 @@ cargo run --release
 ### Keyboard Shortcuts
 
 **Chat Mode:**
+
 - Type your message and press `Enter` to send
 - `Up/Down` - Scroll through chat history
 - `F1` - Show help
@@ -73,27 +74,32 @@ cargo run --release
 - `Ctrl+C` - Quit application
 
 **Model Selection Mode:**
+
 - `Up/Down` - Navigate models
 - `Enter` - Select model
 - `Esc` - Return to chat
 
 **Model Download Mode:**
+
 - Type the model name (e.g., `llama2:latest`, `mistral:latest`)
 - `Enter` - Start download
 - `Esc` - Cancel
 
 **System Monitor Mode:**
+
 - Shows real-time CPU, Memory, GPU stats and top processes
 - `Up/Down` - Scroll through process list
 - Updates every 100ms
 - `Esc` - Return to chat
 
 **Chat History Mode:**
+
 - `Up/Down` - Navigate saved chats
 - `Enter` - Load selected chat
 - `Esc` - Return to chat
 
 **Model Configuration Mode (F8):**
+
 - `Up/Down` or `Tab` - Navigate between fields
 - Type value and press `Enter` - Update field
 - Auto-saves on Enter
@@ -111,6 +117,7 @@ cargo run --release
 ## Docker Configuration
 
 The `docker-compose.yml` file sets up Ollama with:
+
 - Port 11434 exposed for API access
 - Persistent volume for model storage
 - **GPU support enabled by default** (uses all available NVIDIA GPUs)
@@ -122,21 +129,6 @@ GPU support is **already enabled** in the docker-compose.yml file. To use it, yo
 1. **NVIDIA GPU** in your system
 2. **NVIDIA drivers** installed on your host
 3. **NVIDIA Container Toolkit** installed
-
-#### Installing NVIDIA Container Toolkit
-
-```bash
-# For Ubuntu/Debian
-distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
-curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
-curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | \
-    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
-    sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
-
-sudo apt-get update
-sudo apt-get install -y nvidia-container-toolkit
-sudo systemctl restart docker
-```
 
 #### Verify GPU is Working
 
@@ -176,26 +168,20 @@ If Ollama is running on a different host, modify the Ollama connection in `src/m
 let ollama = Ollama::new("http://your-host:11434".to_string());
 ```
 
-## Popular Models to Try
-
-- `llama2:latest` - Meta's Llama 2
-- `mistral:latest` - Mistral AI model
-- `codellama:latest` - Code-focused Llama
-- `deepseek-coder:latest` - DeepSeek code model
-- `phi:latest` - Microsoft's Phi model
-- `gemma:latest` - Google's Gemma model
-
 ## Troubleshooting
 
 **Connection refused error:**
+
 - Ensure Ollama is running: `docker-compose ps`
 - Check if port 11434 is accessible: `curl http://localhost:11434/api/tags`
 
 **Model not found:**
+
 - Pull the model first: `docker exec -it ollama ollama pull <model-name>`
 - Or use F3 in the TUI to download
 
 **Slow responses:**
+
 - Larger models require more resources
 - Try smaller models like `phi:latest` for faster responses
 - Consider GPU support for better performance
@@ -232,14 +218,6 @@ cargo build --release
 - [ ] RAG (Retrieval Augmented Generation) support
 - [ ] Model comparison mode
 
-## Contributing
-
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
-
-## Changelog
-
-See [CHANGELOG.md](CHANGELOG.md) for a history of changes to this project.
-
 ## Acknowledgments
 
 - [Ollama](https://ollama.ai/) - For the amazing local LLM platform
@@ -247,13 +225,10 @@ See [CHANGELOG.md](CHANGELOG.md) for a history of changes to this project.
 - [Tokio](https://tokio.rs/) - For the async runtime
 - All contributors and users of this project
 
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=yourusername/ollama-tui&type=Date)](https://star-history.com/#yourusername/ollama-tui&Date)
-
 ## Support
 
 If you encounter any issues or have questions:
+
 - 🐛 [Report a bug](https://github.com/yourusername/ollama-tui/issues/new?template=bug_report.md)
 - 💡 [Request a feature](https://github.com/yourusername/ollama-tui/issues/new?template=feature_request.md)
 - 💬 [Start a discussion](https://github.com/yourusername/ollama-tui/discussions)
@@ -263,9 +238,3 @@ If you encounter any issues or have questions:
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
-
-<div align="center">
-  Made with ❤️ by the Ollama TUI community
-  <br>
-  <sub>If you find this project useful, please consider giving it a ⭐!</sub>
-</div>
