@@ -97,6 +97,9 @@ struct App {
     config_field: ConfigField,
     config_input: String,
     config_dir: PathBuf,
+    vim_mode: bool,
+    vim_insert: bool,
+    pending_g: bool,
 }
 
 impl App {
@@ -150,6 +153,9 @@ impl App {
             config_field: ConfigField::Temperature,
             config_input: String::new(),
             config_dir,
+            vim_mode: true,
+            vim_insert: true,
+            pending_g: false,
         }
     }
 
@@ -449,6 +455,13 @@ impl App {
     fn scroll_down(&mut self) {
         self.scroll_offset += 1;
     }
+    fn scroll_top(&mut self) {
+        self.scroll_offset = 0;
+    }
+
+    fn scroll_bottom(&mut self) {
+        self.scroll_offset = u16::MAX as usize;
+    }
 }
 
 #[tokio::main]
@@ -469,6 +482,7 @@ async fn main() -> Result<()> {
     let res = run_app(&mut terminal, app_arc).await;
 
     // Restore terminal
+
     disable_raw_mode()?;
     execute!(
         terminal.backend_mut(),
@@ -506,13 +520,95 @@ async fn run_app<B: ratatui::backend::Backend>(
         if event::poll(Duration::from_millis(100))? {
             if let Event::Key(key) = event::read()? {
                 let mut app = app_arc.lock().await;
+
+                // Vim-like key handling pre-processing for Chat mode
+                if app.mode == AppMode::Chat && app.vim_mode {
+                    // Esc/i to switch modes
+                    if let KeyCode::Esc = key.code {
+                        app.vim_insert = false;
+                        app.pending_g = false;
+                        app.status_message = "Normal mode".into();
+                        continue;
+                    }
+                    if matches!(key.code, KeyCode::Char('i')) && key.modifiers.is_empty() && !app.vim_insert {
+                        app.vim_insert = true;
+                        app.status_message = "Insert mode".into();
+                        continue;
+                    }
+
+                    if !app.vim_insert {
+                        match key.code {
+                            KeyCode::Char('j') => {
+                                app.scroll_down();
+                                continue;
+                            }
+                            KeyCode::Char('k') => {
+                                app.scroll_up();
+                                continue;
+                            }
+                            KeyCode::Char('g') => {
+                                if app.pending_g {
+                                    app.scroll_top();
+                                    app.pending_g = false;
+                                } else {
+                                    app.pending_g = true;
+                                }
+                                continue;
+                            }
+                            KeyCode::Char('G') => {
+                                app.scroll_bottom();
+                                continue;
+                            }
+                            // g-prefixed shortcuts for mode switching
+                            KeyCode::Char('m') if app.pending_g => {
+                                let _ = app.fetch_models().await;
+                                app.switch_mode(AppMode::ModelSelection);
+                                app.pending_g = false;
+                                continue;
+                            }
+                            KeyCode::Char('d') if app.pending_g => {
+                                app.switch_mode(AppMode::ModelDownload);
+                                app.pending_g = false;
+                                continue;
+                            }
+                            KeyCode::Char('s') if app.pending_g => {
+                                app.update_system_info();
+                                app.switch_mode(AppMode::SystemMonitor);
+                                app.pending_g = false;
+                                continue;
+                            }
+                            KeyCode::Char('h') if app.pending_g => {
+                                let _ = app.load_chat_history();
+                                app.history_list_state.select(Some(0));
+                                app.switch_mode(AppMode::ChatHistory);
+                                app.pending_g = false;
+                                continue;
+                            }
+                            KeyCode::Char('c') if app.pending_g => {
+                                app.config_input = app.get_current_config_value();
+                                app.switch_mode(AppMode::ModelConfig);
+                                app.pending_g = false;
+                                continue;
+                            }
+                            KeyCode::Char('w') => {
+                                let _ = app.save_current_chat();
+                                continue;
+                            }
+                            _ => {
+                                // Cancel pending g on any other key
+                                app.pending_g = false;
+                            }
+                        }
+                    }
+                }
+
                 match app.mode {
                     AppMode::Chat => match key.code {
                         KeyCode::Char('c') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                             return Ok(());
                         }
                         KeyCode::F(1) => {
-                            app.status_message = "F2: Models | F3: Download | F4: Monitor | F5: History | F6: Save | F7: Clear | F8: Config | Ctrl+S: Select | Ctrl+Y: Copy".to_string();
+                            app.status_message = "Vim: Esc/i modes | j/k scroll | gg top | G bottom | gm models | gd download | gs monitor | gh history | gc config | gw save | Enter send | Ctrl+C quit".to_string();
                         }
                         KeyCode::F(2) => {
                             let _ = app.fetch_models().await;
