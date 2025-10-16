@@ -6,8 +6,6 @@
 
 A powerful, feature-rich terminal user interface (TUI) for interacting with Ollama models. Built with Rust for performance and reliability.
 
-![Ollama TUI Demo](https://via.placeholder.com/800x400.png?text=Ollama+TUI+Demo+Screenshot)
-
 > ⚡ Real-time streaming • 🎛️ Model fine-tuning • 📊 System monitoring • 💾 Session management
 
 ## Features
@@ -24,6 +22,7 @@ A powerful, feature-rich terminal user interface (TUI) for interacting with Olla
 - **Model Downloads**: Download new models directly from the TUI
 - **Docker Support**: Run Ollama in a Docker container with GPU acceleration
 - **Keyboard Navigation**: Fully keyboard-driven interface
+- **Vim Motions**: Easy navigation with familiar keybingdings
 
 ## Prerequisites
 
