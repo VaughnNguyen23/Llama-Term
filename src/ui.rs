@@ -3,7 +3,7 @@ use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span},
-    widgets::{Block, Borders, Gauge, List, ListItem, Paragraph, Row, Table, Wrap, ListState},
+    widgets::{Block, Borders, BorderType, Gauge, List, ListItem, Paragraph, Row, Table, Wrap, ListState},
 };
 
 use crate::app::{App, AppMode, ConfigField};
@@ -25,7 +25,7 @@ pub fn ui(f: &mut Frame, app: &App) {
         app.current_model, app.mode
     ))
     .style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
-    .block(Block::default().borders(Borders::ALL));
+    .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded).border_style(Style::default().fg(Color::Cyan)));
     f.render_widget(title, chunks[0]);
 
     match app.mode {
@@ -71,7 +71,7 @@ fn render_chat(f: &mut Frame, app: &App, area: Rect) {
     }
 
     let messages_widget = Paragraph::new(text)
-        .block(Block::default().borders(Borders::ALL).title("Chat"))
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded).border_style(Style::default().fg(Color::Blue)).title("Chat"))
         .wrap(Wrap { trim: true })
         .scroll((app.scroll_offset as u16, 0));
 
@@ -81,7 +81,7 @@ fn render_chat(f: &mut Frame, app: &App, area: Rect) {
 fn render_input(f: &mut Frame, app: &App, area: Rect) {
     let input = Paragraph::new(app.input.as_str())
         .style(Style::default().fg(Color::White))
-        .block(Block::default().borders(Borders::ALL).title("Input (Press Enter to send)"));
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded).border_style(Style::default().fg(Color::Cyan)).title("Input (Press Enter to send)"));
     f.render_widget(input, area);
 }
 
@@ -98,7 +98,7 @@ fn render_model_selection(f: &mut Frame, app: &App, area: Rect) {
         .collect();
 
     let list = List::new(items)
-        .block(Block::default().borders(Borders::ALL).title("Select Model (Enter to select, Esc to cancel)"))
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded).border_style(Style::default().fg(Color::Green)).title("Select Model (Enter to select, Esc to cancel)"))
         .highlight_style(Style::default().bg(Color::DarkGray).add_modifier(Modifier::BOLD))
         .highlight_symbol(">> ");
 
@@ -109,7 +109,7 @@ fn render_model_selection(f: &mut Frame, app: &App, area: Rect) {
 fn render_model_download(f: &mut Frame, app: &App, area: Rect) {
     let download = Paragraph::new(app.download_input.as_str())
         .style(Style::default().fg(Color::White))
-        .block(Block::default().borders(Borders::ALL).title("Download Model (Enter model name, e.g., 'llama2:latest')"));
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded).border_style(Style::default().fg(Color::Magenta)).title("Download Model (Enter model name, e.g., 'llama2:latest')"));
     f.render_widget(download, area);
 }
 
@@ -128,7 +128,7 @@ fn render_system_monitor(f: &mut Frame, app: &App, area: Rect) {
     let cpu_percent = app.cpu_usage.min(100.0);
     let cpu_color = if cpu_percent > 80.0 { Color::Red } else if cpu_percent > 50.0 { Color::Yellow } else { Color::Cyan };
     let cpu_gauge = Gauge::default()
-        .block(Block::default().borders(Borders::ALL).title(Span::styled("━━━ CPU ━━━", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))).border_style(Style::default().fg(Color::Cyan)))
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded).title(Span::styled("━━━ CPU ━━━", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))).border_style(Style::default().fg(Color::Cyan)))
         .gauge_style(Style::default().fg(cpu_color).bg(Color::Black).add_modifier(Modifier::BOLD))
         .percent(cpu_percent as u16)
         .label(Span::styled(format!("{:.1}%", cpu_percent), Style::default().fg(Color::White).add_modifier(Modifier::BOLD)));
@@ -140,7 +140,7 @@ fn render_system_monitor(f: &mut Frame, app: &App, area: Rect) {
     let memory_gb_total = app.memory_total as f64 / 1024.0 / 1024.0 / 1024.0;
     let mem_color = if memory_percent > 80 { Color::Red } else if memory_percent > 50 { Color::Yellow } else { Color::Magenta };
     let memory_gauge = Gauge::default()
-        .block(Block::default().borders(Borders::ALL).title(Span::styled("━━━ MEMORY ━━━", Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD))).border_style(Style::default().fg(Color::Magenta)))
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded).title(Span::styled("━━━ MEMORY ━━━", Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD))).border_style(Style::default().fg(Color::Magenta)))
         .gauge_style(Style::default().fg(mem_color).bg(Color::Black).add_modifier(Modifier::BOLD))
         .percent(memory_percent)
         .label(Span::styled(format!("{:.1} GB / {:.1} GB", memory_gb_used, memory_gb_total), Style::default().fg(Color::White).add_modifier(Modifier::BOLD)));
@@ -166,6 +166,7 @@ fn render_system_monitor(f: &mut Frame, app: &App, area: Rect) {
         .block(
             Block::default()
                 .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
                 .title(Span::styled("━━━ GPU ━━━", Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)))
                 .border_style(Style::default().fg(Color::Green)),
         );
@@ -195,7 +196,7 @@ fn render_system_monitor(f: &mut Frame, app: &App, area: Rect) {
         Row::new(vec!["Process", "CPU", "Memory"]).style(Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)).bottom_margin(1),
     )
     .block(
-        Block::default().borders(Borders::ALL).title(Span::styled("━━━ TOP PROCESSES ━━━", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))).border_style(Style::default().fg(Color::Yellow)),
+        Block::default().borders(Borders::ALL).border_type(BorderType::Rounded).title(Span::styled("━━━ TOP PROCESSES ━━━", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))).border_style(Style::default().fg(Color::Yellow)),
     )
     .column_spacing(2);
 
@@ -217,7 +218,7 @@ fn render_chat_history(f: &mut Frame, app: &App, area: Rect) {
         .collect();
 
     let list = List::new(items)
-        .block(Block::default().borders(Borders::ALL).title("Chat History (Enter to load, Esc to cancel)"))
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded).border_style(Style::default().fg(Color::Blue)).title("Chat History (Enter to load, Esc to cancel)"))
         .highlight_style(Style::default().bg(Color::DarkGray).add_modifier(Modifier::BOLD))
         .highlight_symbol(">> ");
 
@@ -309,7 +310,7 @@ fn render_model_config(f: &mut Frame, app: &App, area: Rect) {
     ];
 
     let config_widget = Paragraph::new(config_items)
-        .block(Block::default().borders(Borders::ALL).title(Span::styled("━━━ MODEL CONFIGURATION ━━━", Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD))).border_style(Style::default().fg(Color::Magenta)))
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded).title(Span::styled("━━━ MODEL CONFIGURATION ━━━", Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD))).border_style(Style::default().fg(Color::Magenta)))
         .wrap(Wrap { trim: false });
 
     f.render_widget(config_widget, chunks[0]);
@@ -325,6 +326,6 @@ fn render_model_config(f: &mut Frame, app: &App, area: Rect) {
 
     let input = Paragraph::new(app.config_input.as_str())
         .style(Style::default().fg(Color::White))
-        .block(Block::default().borders(Borders::ALL).title(format!("Editing: {} (Press Enter to save)", field_name)).border_style(Style::default().fg(Color::Yellow)));
+        .block(Block::default().borders(Borders::ALL).border_type(BorderType::Rounded).title(format!("Editing: {} (Press Enter to save)", field_name)).border_style(Style::default().fg(Color::Yellow)));
     f.render_widget(input, chunks[1]);
 }
