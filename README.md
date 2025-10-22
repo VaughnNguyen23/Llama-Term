@@ -4,10 +4,6 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Rust](https://img.shields.io/badge/rust-2021-orange.svg)](https://www.rust-lang.org)
 
-A powerful, feature-rich terminal user interface (TUI) for interacting with Ollama models. Built with Rust for performance and reliability.
-
-> ⚡ Real-time streaming • 🎛️ Model fine-tuning • 📊 System monitoring • 💾 Session management
-
 ## Features
 
 - **Interactive Chat**: Chat with any Ollama model in a clean TUI
@@ -57,7 +53,7 @@ cargo run --release
 ### Keyboard Shortcuts
 
 **Chat Mode:**
-
+- ** Moved to vim motions for navigation will update soon F1 to list keybind and help for now
 - Type your message and press `Enter` to send
 - `Up/Down` - Scroll through chat history
 - `F1` - Show help
@@ -174,17 +170,6 @@ let ollama = Ollama::new("http://your-host:11434".to_string());
 - Ensure Ollama is running: `docker-compose ps`
 - Check if port 11434 is accessible: `curl http://localhost:11434/api/tags`
 
-**Model not found:**
-
-- Pull the model first: `docker exec -it ollama ollama pull <model-name>`
-- Or use F3 in the TUI to download
-
-**Slow responses:**
-
-- Larger models require more resources
-- Try smaller models like `phi:latest` for faster responses
-- Consider GPU support for better performance
-
 ## File Storage
 
 - **Chat sessions**: `~/.ollama_tui/chats/` - Saved when you press F6
@@ -199,38 +184,13 @@ Model configuration persists across sessions and is automatically loaded on star
 # Build optimized binary
 cargo build --release
 
-# Binary location
-./target/release/ollama_testing
-```
-
-## Screenshots
-
-*Coming soon - Add screenshots of your TUI in action!*
-
-## Roadmap
-
-- [ ] Multi-model conversation support
-- [ ] Export chats to markdown/PDF
-- [ ] Custom themes and color schemes
-- [ ] Plugin system for extensions
-- [ ] Voice input/output support
-- [ ] RAG (Retrieval Augmented Generation) support
-- [ ] Model comparison mode
-
-## Acknowledgments
-
-- [Ollama](https://ollama.ai/) - For the amazing local LLM platform
-- [Ratatui](https://github.com/ratatui-org/ratatui) - For the excellent TUI framework
-- [Tokio](https://tokio.rs/) - For the async runtime
-- All contributors and users of this project
-
 ## Support
 
 If you encounter any issues or have questions:
 
-- 🐛 [Report a bug](https://github.com/yourusername/ollama-tui/issues/new?template=bug_report.md)
-- 💡 [Request a feature](https://github.com/yourusername/ollama-tui/issues/new?template=feature_request.md)
-- 💬 [Start a discussion](https://github.com/yourusername/ollama-tui/discussions)
+- [Report a bug](https://github.com/yourusername/ollama-tui/issues/new?template=bug_report.md)
+- [Request a feature](https://github.com/yourusername/ollama-tui/issues/new?template=feature_request.md)
+- [Start a discussion](https://github.com/yourusername/ollama-tui/discussions)
 
 ## License
 
